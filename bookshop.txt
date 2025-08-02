@@ -1,0 +1,270 @@
+package ptr;
+import javax.swing.*;
+
+	// Abstract class for order process
+ abstract class OrderProcess {
+	   abstract void selectItems();
+	   abstract void checkout();
+	    abstract double calculateTotal();
+	      void placeOrder() {
+	    	 JOptionPane.showMessageDialog(null, "📦 Your books will arrive within 2-3 days. Thank you for shopping with us!");
+	     };
+	}
+class User {
+	    String name;
+	    String phone;
+
+	    public User(String name, String phone) {
+	        this.name = name;
+	        this.phone = phone;
+	    }
+	}
+
+	
+
+	 class BookstoreApp extends OrderProcess  {
+	    private JFrame frame;
+	    private JPanel panel1, panel2, panel3;
+	    private JTextField nameField, phoneField, addressField;
+	    private JTextField[] quantityFields;
+	    private JTextArea receiptArea;
+
+	    String[] books = {
+	        "Atomic Habits", "The Alchemist", "Ikigai", "Rich Dad Poor Dad", "Harry Potter",
+	        "The Psychology of Money", "Think Like a Monk", "Deep Work", "Educated", "Wings of Fire"
+	    };
+	    double[] prices = {
+	        800, 700, 600, 750, 1200,
+	        850, 900, 950, 780, 500
+	    };
+	    String[] remarks = {
+	        "Build good habits", "Spiritual story", "Japanese wisdom", "Finance guide", "Fantasy magic",
+	        "Money mindset", "Spiritual growth", "Focus better", "Memoir of struggle", "Dr. Kalam's story"
+	    };
+
+	    int[] quantities = new int[books.length];
+	    final double deliveryCharge = 150.0;
+
+	    //object of class Customer
+	    User currentCustomer;
+
+	    //constructor
+	   BookstoreApp() {
+	        frame = new JFrame("📚 Bookstore Shopping App");
+	        frame.setSize(550, 700);
+	       
+	        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	        frame.setLayout(null);
+	        frame.setLocationRelativeTo(null);
+	        showRegistrationPage();
+	        frame.setVisible(true);
+	    }
+
+	    //Method that displays registration page (panel1)
+	    private void showRegistrationPage() {
+	        panel1 = new JPanel(null);
+	        panel1.setBounds(0, 0, 550, 700);
+
+	        JLabel welcomeLabel = new JLabel("📚 Welcome to the Online Bookstore!");
+	        welcomeLabel.setBounds(80, 20, 400, 30);
+	        welcomeLabel.setFont(welcomeLabel.getFont().deriveFont(18f));
+	        panel1.add(welcomeLabel);
+
+	        JLabel bookOfDay = new JLabel("📖 Book of the Day: 'Atomic Habits'");
+	        bookOfDay.setBounds(80, 50, 400, 30);
+	        bookOfDay.setFont(bookOfDay.getFont().deriveFont(16f));
+	        panel1.add(bookOfDay);
+
+	        JLabel nameLabel = new JLabel("Enter Name:");
+	        nameLabel.setBounds(50, 120, 100, 25);
+	        panel1.add(nameLabel);
+
+	        nameField = new JTextField();
+	        nameField.setBounds(180, 120, 250, 25);
+	        panel1.add(nameField);
+
+	        JLabel phoneLabel = new JLabel("Enter Phone Number:");
+	        phoneLabel.setBounds(50, 160, 150, 25);
+	        panel1.add(phoneLabel);
+
+	        phoneField = new JTextField();
+	        phoneField.setBounds(200, 160, 230, 25);
+	        panel1.add(phoneField);
+
+	        JButton nextButton = new JButton("Continue");
+	        nextButton.setBounds(200, 220, 120, 30);
+	        panel1.add(nextButton);
+
+	        nextButton.addActionListener(e -> {
+	            String name = nameField.getText().trim();
+	            String phone = phoneField.getText().trim();
+	            if (name.isEmpty() || phone.isEmpty()) {     //if any of the fields is empty
+	                JOptionPane.showMessageDialog(frame, "Please fill all fields.");
+	                return;
+	            }
+	            currentCustomer = new User(name, phone);
+	            frame.remove(panel1);
+	            showShoppingPage();
+	        });
+
+	        frame.add(panel1);
+	        frame.repaint();       //redraw the frame
+	        frame.revalidate();    //update the layout
+	    }
+
+	    private void showShoppingPage() {
+	        panel2 = new JPanel(null);
+	        quantityFields = new JTextField[books.length];
+
+	        JLabel heading = new JLabel("📚 Select Books and Quantities:");
+	        heading.setBounds(130, 10, 300, 25);
+	        panel2.add(heading);
+
+	        for (int i = 0; i < books.length; i++) {
+	            JLabel itemLabel = new JLabel(books[i] + " - Rs " + prices[i] + " (" + remarks[i] + ")");
+	            itemLabel.setBounds(20, 50 + i * 40, 400, 25);
+	            panel2.add(itemLabel);
+
+	            quantityFields[i] = new JTextField("0");
+	            quantityFields[i].setBounds(430, 50 + i * 40, 40, 25);
+	            panel2.add(quantityFields[i]);
+	        }
+	        JButton backButton = new JButton("Back");
+	        backButton.setBounds(20, 600, 100, 30);
+	        panel2.add(backButton);
+
+	        backButton.addActionListener(e -> {
+	            frame.remove(panel2);
+	            showRegistrationPage(); // Go back to registration
+	        });
+
+
+	        JButton checkoutBtn = new JButton("Checkout");
+	        checkoutBtn.setBounds(200, 600, 120, 30);
+	        panel2.add(checkoutBtn);
+
+	        checkoutBtn.addActionListener(e -> {
+	            try {
+	                for (int i = 0; i < books.length; i++) {
+	                    int qty = Integer.parseInt(quantityFields[i].getText().trim());
+	                    if (qty < 0) throw new Exception("Negative quantity");
+	                    quantities[i] = qty;
+	                }
+	                frame.remove(panel2);
+	                showCheckoutPage();
+	            } catch (Exception ex) {
+	                JOptionPane.showMessageDialog(frame, "Invalid quantity input.");    //catches both NumberFormat exception,negative quantity exception
+	            }
+	        });
+
+	        panel2.setBounds(0, 0, 550, 700);
+	        frame.add(panel2);
+	        frame.repaint();
+	        frame.revalidate();
+	    }
+
+	    private void showCheckoutPage() {
+	        panel3 = new JPanel(null);
+	        
+	        checkout();
+
+	        receiptArea.setBounds(20, 20, 480, 300);
+	        panel3.add(receiptArea);
+
+	        JLabel addressLabel = new JLabel("Enter Delivery Address:");
+	        addressLabel.setBounds(30, 330, 200, 25);
+	        panel3.add(addressLabel);
+
+	        addressField = new JTextField();
+	        addressField.setBounds(200, 330, 280, 25);
+	        panel3.add(addressField);
+
+	        JLabel deliveryNote = new JLabel("⏳ Expected Delivery: 2-3 Days");
+	        deliveryNote.setBounds(180, 360, 250, 25);
+	        deliveryNote.setFont(deliveryNote.getFont().deriveFont(16f));
+	        panel3.add(deliveryNote);
+	        
+	        JButton backButton = new JButton("Back");
+	        backButton.setBounds(20, 420, 100, 30);
+	        panel3.add(backButton);
+
+	        backButton.addActionListener(e -> {
+	            frame.remove(panel3);
+	            showShoppingPage(); // Go back to shopping page
+	        });
+
+
+	        JButton placeOrderBtn = new JButton("Place Order");
+	        placeOrderBtn.setBounds(200, 420, 130, 30);
+	        panel3.add(placeOrderBtn);
+
+	        placeOrderBtn.addActionListener(e -> {
+	            if (addressField.getText().trim().isEmpty()) {
+	                JOptionPane.showMessageDialog(frame, "Please enter your address.");
+	                return;
+	            }
+	            
+	           placeOrder();
+	        }
+	            	 
+	);
+
+	        panel3.setBounds(0, 0, 550, 700);
+	        frame.add(panel3);
+	        frame.repaint();
+	        frame.revalidate();
+	    }
+
+	    @Override
+	    public void selectItems() {
+	        // Optional: log selected items
+	    }
+	    @Override
+	    public double calculateTotal() {
+	        double total = 0;
+	        for (int i = 0; i < books.length; i++) {
+	            total += quantities[i] * prices[i];
+	        }
+	        return total + deliveryCharge;
+	    }
+
+	    @Override
+	    public void checkout() {
+	        receiptArea = new JTextArea();
+	        receiptArea.setEditable(false);
+	        StringBuilder sb = new StringBuilder();
+	        sb.append("🧾 Receipt for ").append(currentCustomer.name).append("\n");
+	        sb.append("----------------------------------------\n");
+	        double total = 0.0;
+	        for (int i = 0; i < books.length; i++) {
+	            if (quantities[i] > 0) {
+	                double itemTotal = quantities[i] * prices[i];
+	                sb.append(books[i]).append(" x ").append(quantities[i])
+	                        .append(" = Rs ").append(itemTotal).append("\n");
+
+	            }
+	        }
+	        
+	        sb.append("----------------------------------------\n");
+	        sb.append("Delivery Charges: Rs ").append(deliveryCharge).append("\n");
+	        sb.append("Total: Rs ").append(calculateTotal()).append("\n");
+	        sb.append("Payment: Cash on Delivery\n");
+
+	        receiptArea.setText(sb.toString());
+	    }	  
+}
+
+
+
+package ptr;
+
+public class BookMain {
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		   
+		   new BookstoreApp();
+	}
+	
+
+}
